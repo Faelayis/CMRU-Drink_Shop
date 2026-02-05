@@ -26,7 +26,11 @@ class _SettingScreenState extends State<SettingScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black87, size: 28),
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.black87,
+                      size: 28,
+                    ),
                     onPressed: () {
                       // Handle back
                     },
@@ -46,7 +50,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 10),
 
             // --- Menu List Container ---
@@ -60,7 +64,10 @@ class _SettingScreenState extends State<SettingScreen> {
                   ),
                 ),
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 24),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 30,
+                    horizontal: 24,
+                  ),
                   children: [
                     _buildMenuItem(
                       icon: Icons.account_circle_outlined,
@@ -68,24 +75,24 @@ class _SettingScreenState extends State<SettingScreen> {
                       onTap: () {},
                     ),
                     _buildDivider(),
-                    
+
                     _buildNotificationItem(),
                     _buildDivider(),
-                    
+
                     _buildMenuItem(
                       icon: Icons.delete_outline,
                       title: "Delete Account",
                       onTap: () {},
                     ),
                     _buildDivider(),
-                    
+
                     _buildMenuItem(
                       icon: Icons.language,
                       title: "Language",
                       onTap: () {},
                     ),
                     _buildDivider(),
-                    
+
                     _buildMenuItem(
                       icon: Icons.exit_to_app,
                       title: "Logout",
@@ -134,7 +141,11 @@ class _SettingScreenState extends State<SettingScreen> {
   Widget _buildNotificationItem() {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-      leading: const Icon(Icons.notifications_none_outlined, size: 28, color: Colors.black87),
+      leading: const Icon(
+        Icons.notifications_none_outlined,
+        size: 28,
+        color: Colors.black87,
+      ),
       title: const Text(
         "Notification",
         style: TextStyle(
@@ -147,18 +158,18 @@ class _SettingScreenState extends State<SettingScreen> {
         scale: 0.9,
         child: Switch(
           value: _isNotificationEnabled,
-          activeColor: Colors.white,
+          activeThumbColor: Colors.white,
           activeTrackColor: const Color(0xFF8D6E63),
           inactiveThumbColor: Colors.grey,
           inactiveTrackColor: Colors.grey[300],
-          trackOutlineColor: WidgetStateProperty.resolveWith(
-            (final Set<WidgetState> states) {
-               if (states.contains(WidgetState.selected)) {
-                 return null;
-               }
-               return Colors.transparent;
-            },
-          ),
+          trackOutlineColor: WidgetStateProperty.resolveWith((
+            final Set<WidgetState> states,
+          ) {
+            if (states.contains(WidgetState.selected)) {
+              return null;
+            }
+            return Colors.transparent;
+          }),
           onChanged: (bool value) {
             setState(() {
               _isNotificationEnabled = value;

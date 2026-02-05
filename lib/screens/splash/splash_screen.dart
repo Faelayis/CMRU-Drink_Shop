@@ -50,7 +50,9 @@ class _SplashScreenState extends State<SplashScreen> {
                           color: Colors.brown.shade800, // แทนกลุ่มเมล็ดกาแฟ
                           image: const DecorationImage(
                             // ในโปรเจกต์จริง ใช้ Image.asset('assets/images/coffee_beans_bg.png')
-                            image: NetworkImage('https://via.placeholder.com/260/3e2723/FFFFFF?text=Coffee+Beans'), 
+                            image: NetworkImage(
+                              'https://via.placeholder.com/260/3e2723/FFFFFF?text=Coffee+Beans',
+                            ),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -60,7 +62,9 @@ class _SplashScreenState extends State<SplashScreen> {
                         width: 140,
                         height: 140,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFC69C6D), // สีน้ำตาลอ่อนของโลโก้
+                          color: const Color(
+                            0xFFC69C6D,
+                          ), // สีน้ำตาลอ่อนของโลโก้
                           borderRadius: BorderRadius.circular(35),
                           boxShadow: [
                             BoxShadow(
@@ -73,7 +77,11 @@ class _SplashScreenState extends State<SplashScreen> {
                         child: const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.coffee, size: 60, color: Colors.white), // แทนรูปแก้วยิ้ม
+                            Icon(
+                              Icons.coffee,
+                              size: 60,
+                              color: Colors.white,
+                            ), // แทนรูปแก้วยิ้ม
                             SizedBox(height: 5),
                             Text(
                               "Brewly",
@@ -90,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 40),
 
                 // 2. ข้อความ "Brewly CoffeE" แบบมีขอบ (Outlined Text Style)
@@ -110,11 +118,13 @@ class _SplashScreenState extends State<SplashScreen> {
               width: 120,
               // ในโปรเจกต์จริง ใช้ Image.asset('assets/images/caramel_drink.png')
               decoration: const BoxDecoration(
-                 color: Colors.transparent,
-                 image: DecorationImage(
-                    image: NetworkImage('https://via.placeholder.com/150x200/transparent/brown?text=Drink'),
-                    fit: BoxFit.contain,
-                 ),
+                color: Colors.transparent,
+                image: DecorationImage(
+                  image: NetworkImage(
+                    'https://via.placeholder.com/150x200/transparent/brown?text=Drink',
+                  ),
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
           ),

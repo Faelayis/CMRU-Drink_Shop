@@ -12,9 +12,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF3E9D9), // สีพื้นหลัง
-      body: const Center(
-        child: Text("Home Screen"),
-      ),
+      body: const Center(child: Text("Home Screen")),
     );
   }
 }

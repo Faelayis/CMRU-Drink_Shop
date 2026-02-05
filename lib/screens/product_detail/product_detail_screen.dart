@@ -29,7 +29,11 @@ class MenuScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.menu_book_rounded, size: 80, color: Colors.brown.withOpacity(0.3)),
+                      Icon(
+                        Icons.menu_book_rounded,
+                        size: 80,
+                        color: Colors.brown.withOpacity(0.3),
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         "All Menu Items",
