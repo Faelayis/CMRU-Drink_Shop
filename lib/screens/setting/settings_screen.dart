@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../auth/login/login_screen.dart';
+import '../../models/profile.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -9,6 +12,129 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> {
   bool _isNotificationEnabled = true;
+  late Future<Profile?> _profileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileFuture = _fetchProfile();
+  }
+
+  Future<Profile?> _fetchProfile() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      return null;
+    }
+
+    final response = await Supabase.instance.client
+        .from('profiles')
+        .select('id, full_name, avatar_url, phone')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (response == null) {
+      return Profile(id: user.id, fullName: user.email);
+    }
+
+    return Profile.fromMap(response);
+  }
+
+  Future<void> _resetPassword() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null || user.email == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No email associated with this account.')),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Password'),
+        content: Text('A password reset link will be sent to ${user.email}.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Send'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await Supabase.instance.client.auth.resetPasswordForEmail(user.email!);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password reset email sent.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to send reset email: $error')),
+      );
+    }
+  }
+
+  Future<void> _deleteAccount() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+          'Are you sure you want to delete your account? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await Supabase.instance.client.rpc('delete_user');
+      await Supabase.instance.client.auth.signOut();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Account deleted successfully.')),
+      );
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+        (_) => false,
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete account: $error')),
+      );
+    }
+  }
+
+  Future<void> _signOut() async {
+    await Supabase.instance.client.auth.signOut();
+    if (!mounted) {
+      return;
+    }
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (_) => false,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +158,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       size: 28,
                     ),
                     onPressed: () {
-                      // Handle back
+                      Navigator.of(context).maybePop();
                     },
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -69,10 +195,124 @@ class _SettingScreenState extends State<SettingScreen> {
                     horizontal: 24,
                   ),
                   children: [
+                    FutureBuilder<Profile?>(
+                      future: _profileFuture,
+                      builder: (context, snapshot) {
+                        final user = Supabase.instance.client.auth.currentUser;
+                        final profile = snapshot.data;
+                        final avatarUrl = profile?.avatarUrl;
+                        final displayName =
+                            profile?.fullName?.isNotEmpty == true
+                            ? profile!.fullName!
+                            : user?.email ?? 'User';
+                        if (user == null) {
+                          return Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Guest',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                const Text(
+                                  'Sign in to sync your profile.',
+                                  style: TextStyle(color: Colors.black54),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LoginScreen(),
+                                      ),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF965A28),
+                                  ),
+                                  child: const Text(
+                                    'Sign in',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        return Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 28,
+                                backgroundColor: Colors.brown.shade200,
+                                backgroundImage:
+                                    avatarUrl == null || avatarUrl.isEmpty
+                                    ? null
+                                    : NetworkImage(avatarUrl),
+                                child: avatarUrl == null || avatarUrl.isEmpty
+                                    ? const Icon(
+                                        Icons.person,
+                                        color: Colors.white,
+                                      )
+                                    : null,
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      displayName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      user.email ?? '',
+                                      style: const TextStyle(
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    _buildDivider(),
                     _buildMenuItem(
                       icon: Icons.account_circle_outlined,
                       title: "Profile",
                       onTap: () {},
+                    ),
+                    _buildDivider(),
+
+                    _buildMenuItem(
+                      icon: Icons.lock_reset,
+                      title: "Reset Password",
+                      onTap: () {
+                        _resetPassword();
+                      },
                     ),
                     _buildDivider(),
 
@@ -82,7 +322,9 @@ class _SettingScreenState extends State<SettingScreen> {
                     _buildMenuItem(
                       icon: Icons.delete_outline,
                       title: "Delete Account",
-                      onTap: () {},
+                      onTap: () {
+                        _deleteAccount();
+                      },
                     ),
                     _buildDivider(),
 
@@ -98,7 +340,9 @@ class _SettingScreenState extends State<SettingScreen> {
                       title: "Logout",
                       textColor: Colors.red,
                       showArrow: false,
-                      onTap: () {},
+                      onTap: () {
+                        _signOut();
+                      },
                     ),
                     _buildDivider(),
 

@@ -8,6 +8,13 @@
       "program": "lib/main.dart"
     },
     {
+      "name": "Flutter on Chrome",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--web-port", "1111"]
+    },
+    {
       "name": "flutter_project (profile mode)",
       "request": "launch",
       "type": "dart",

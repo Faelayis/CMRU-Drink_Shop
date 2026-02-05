@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../auth/login/login_screen.dart';
 import '../main_wrapper.dart'; // import หน้า MainWrapper (ตรวจสอบ path ให้ตรงกับโปรเจกต์จริง)
 
 class SplashScreen extends StatefulWidget {
@@ -12,15 +14,21 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // ตั้งเวลา 3 วินาที แล้วเปลี่ยนไปหน้า MainWrapper
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        // ใช้ pushReplacement เพื่อไม่ให้กด Back กลับมาหน้านี้ได้
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const MainWrapper()),
-        );
-      }
-    });
+    _routeNext();
+  }
+
+  Future<void> _routeNext() async {
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) {
+      return;
+    }
+
+    final session = Supabase.instance.client.auth.currentSession;
+    final next = session == null ? const LoginScreen() : const MainWrapper();
+
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (context) => next));
   }
 
   @override
