@@ -144,6 +144,21 @@ class _MenuScreenState extends State<MenuScreen> {
                                               width: 72,
                                               height: 72,
                                               fit: BoxFit.cover,
+                                              errorBuilder:
+                                                  (
+                                                    context,
+                                                    error,
+                                                    stackTrace,
+                                                  ) => Container(
+                                                    width: 72,
+                                                    height: 72,
+                                                    color:
+                                                        Colors.brown.shade200,
+                                                    child: const Icon(
+                                                      Icons.broken_image,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
                                             ),
                                     ),
                                     const SizedBox(width: 16),
