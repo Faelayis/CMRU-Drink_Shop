@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/menu_item.dart';
@@ -107,116 +108,16 @@ class _MenuScreenState extends State<MenuScreen> {
                         separatorBuilder: (_, __) => const SizedBox(height: 16),
                         itemBuilder: (context, index) {
                           final item = items[index];
-                          return Material(
-                            color: const Color(0xFFEADCC6),
-                            borderRadius: BorderRadius.circular(16),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(16),
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        ProductDetailScreen(item: item),
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child:
-                                          item.imageUrl == null ||
-                                              item.imageUrl!.isEmpty
-                                          ? Container(
-                                              width: 72,
-                                              height: 72,
-                                              color: Colors.brown.shade200,
-                                              child: const Icon(
-                                                Icons.local_cafe,
-                                                color: Colors.white,
-                                                size: 32,
-                                              ),
-                                            )
-                                          : Image.network(
-                                              item.imageUrl!,
-                                              width: 72,
-                                              height: 72,
-                                              fit: BoxFit.cover,
-                                              errorBuilder:
-                                                  (
-                                                    context,
-                                                    error,
-                                                    stackTrace,
-                                                  ) => Container(
-                                                    width: 72,
-                                                    height: 72,
-                                                    color:
-                                                        Colors.brown.shade200,
-                                                    child: const Icon(
-                                                      Icons.broken_image,
-                                                      color: Colors.white,
-                                                    ),
-                                                  ),
-                                            ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            item.name,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 6),
-                                          Text(
-                                            item.description?.isNotEmpty == true
-                                                ? item.description!
-                                                : 'No description',
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              color: Colors.black54,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          '฿${item.price.toStringAsFixed(2)}',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          item.isAvailable
-                                              ? 'Available'
-                                              : 'Sold out',
-                                          style: TextStyle(
-                                            color: item.isAvailable
-                                                ? Colors.green.shade700
-                                                : Colors.red.shade400,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                          return LiquidGlassProductCard(
+                            item: item,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ProductDetailScreen(item: item),
                                 ),
-                              ),
-                            ),
+                              );
+                            },
                           );
                         },
                       ),
@@ -226,6 +127,159 @@ class _MenuScreenState extends State<MenuScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class LiquidGlassProductCard extends StatelessWidget {
+  final MenuItem item;
+  final VoidCallback onTap;
+
+  const LiquidGlassProductCard({
+    super.key,
+    required this.item,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.brown.withOpacity(0.1),
+            blurRadius: 50,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.4),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.5),
+                width: 1.5,
+              ),
+            ),
+            child: InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            spreadRadius: -2,
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: _buildImage(),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF4E342E),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            item.description ?? '',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.brown.shade800.withOpacity(0.7),
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '฿${item.price.toInt()}',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF4E342E),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildStatusBadge(),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImage() {
+    if (item.imageUrl == null || item.imageUrl!.isEmpty) {
+      return Container(
+        width: 70,
+        height: 70,
+        color: Colors.brown.shade100,
+        child: const Icon(Icons.local_cafe, color: Colors.white, size: 30),
+      );
+    }
+    return Image.network(
+      item.imageUrl!,
+      width: 70,
+      height: 70,
+      fit: BoxFit.cover,
+      errorBuilder: (context, e, s) => Container(
+        width: 70,
+        height: 70,
+        color: Colors.brown.shade100,
+        child: const Icon(Icons.broken_image, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: item.isAvailable
+            ? Colors.green.withOpacity(0.2)
+            : Colors.red.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        item.isAvailable ? 'Available' : 'Sold out',
+        style: TextStyle(
+          color: item.isAvailable ? Colors.green.shade800 : Colors.red.shade800,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:drink_shop/screens/setting/language/language_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../auth/login/login_screen.dart';
@@ -145,7 +146,6 @@ class _SettingScreenState extends State<SettingScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- Header ---
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 10),
               child: Column(
@@ -178,8 +178,6 @@ class _SettingScreenState extends State<SettingScreen> {
             ),
 
             const SizedBox(height: 10),
-
-            // --- Menu List Container ---
             Expanded(
               child: Container(
                 decoration: const BoxDecoration(
@@ -331,7 +329,14 @@ class _SettingScreenState extends State<SettingScreen> {
                     _buildMenuItem(
                       icon: Icons.language,
                       title: "Language",
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const LanguageScreen(),
+                          ),
+                        );
+                      },
                     ),
                     _buildDivider(),
 
@@ -346,7 +351,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     ),
                     _buildDivider(),
 
-                    const SizedBox(height: 100), // Space for bottom bar
+                    const SizedBox(height: 100),
                   ],
                 ),
               ),
