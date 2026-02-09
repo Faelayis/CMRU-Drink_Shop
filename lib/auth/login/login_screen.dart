@@ -224,7 +224,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         )
                       : const Icon(Icons.code, color: Colors.black87),
                   label: const Text(
-                    'GitHubbbb',
+                    'GitHub',
                     style: TextStyle(color: Colors.black87),
                   ),
                   style: OutlinedButton.styleFrom(
