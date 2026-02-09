@@ -1,8 +1,10 @@
-import 'package:drink_shop/screens/setting/language/language_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../auth/admin/admin_screen.dart';
 import '../../auth/login/login_screen.dart';
 import '../../models/profile.dart';
+import 'profile_screen.dart';
+import 'language/language_screen.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -29,7 +31,7 @@ class _SettingScreenState extends State<SettingScreen> {
 
     final response = await Supabase.instance.client
         .from('profiles')
-        .select('id, full_name, avatar_url, phone')
+        .select('id, full_name, avatar_url, phone, is_admin')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -301,7 +303,13 @@ class _SettingScreenState extends State<SettingScreen> {
                     _buildMenuItem(
                       icon: Icons.account_circle_outlined,
                       title: "Profile",
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ProfileScreen(),
+                          ),
+                        );
+                      },
                     ),
                     _buildDivider(),
 
@@ -326,14 +334,39 @@ class _SettingScreenState extends State<SettingScreen> {
                     ),
                     _buildDivider(),
 
+                    FutureBuilder<Profile?>(
+                      future: _profileFuture,
+                      builder: (context, snapshot) {
+                        final profile = snapshot.data;
+                        if (profile == null || !profile.isAdmin) {
+                          return const SizedBox.shrink();
+                        }
+                        return Column(
+                          children: [
+                            _buildMenuItem(
+                              icon: Icons.admin_panel_settings,
+                              title: "Admin Panel",
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => const AdminScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _buildDivider(),
+                          ],
+                        );
+                      },
+                    ),
+
                     _buildMenuItem(
                       icon: Icons.language,
                       title: "Language",
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) =>
-                                const LanguageScreen(),
+                            builder: (_) => const LanguageScreen(),
                           ),
                         );
                       },

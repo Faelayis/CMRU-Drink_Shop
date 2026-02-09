@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT,
   avatar_url TEXT,
-  phone TEXT
+  phone TEXT,
+  is_admin BOOLEAN NOT NULL DEFAULT false
 );
 
 -- menu_items
@@ -22,6 +23,7 @@ CREATE TABLE IF NOT EXISTS public.orders (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   status TEXT NOT NULL DEFAULT 'pending',
   total_amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+  size TEXT NOT NULL DEFAULT 'Medium',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -39,10 +41,31 @@ CREATE POLICY "Users can update own profile"
   ON public.profiles FOR UPDATE
   USING (auth.uid() = id);
 
+-- helper: check if current user is admin
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean AS $$
+  SELECT COALESCE(
+    (SELECT is_admin FROM public.profiles WHERE id = auth.uid()),
+    false
+  );
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
 -- menu_items
 CREATE POLICY "Anyone can read menu items"
   ON public.menu_items FOR SELECT
   USING (true);
+
+CREATE POLICY "Admins can insert menu items"
+  ON public.menu_items FOR INSERT
+  WITH CHECK (public.is_admin());
+
+CREATE POLICY "Admins can update menu items"
+  ON public.menu_items FOR UPDATE
+  USING (public.is_admin());
+
+CREATE POLICY "Admins can delete menu items"
+  ON public.menu_items FOR DELETE
+  USING (public.is_admin());
 
 -- orders
 CREATE POLICY "Users can read own orders"
@@ -74,3 +97,8 @@ BEGIN
   DELETE FROM auth.users WHERE id = auth.uid();
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Realtime
+ALTER PUBLICATION supabase_realtime ADD TABLE public.menu_items;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.profiles;

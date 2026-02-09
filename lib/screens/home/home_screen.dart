@@ -12,23 +12,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late Future<List<MenuItem>> _featuredFuture;
+  late final Stream<List<Map<String, dynamic>>> _featuredStream;
 
   @override
   void initState() {
     super.initState();
-    _featuredFuture = _fetchFeatured();
-  }
-
-  Future<List<MenuItem>> _fetchFeatured() async {
-    final response = await Supabase.instance.client
+    _featuredStream = Supabase.instance.client
         .from('menu_items')
-        .select('id, name, price, image_url, description, is_available')
-        .order('name');
-        
-    return (response as List<dynamic>)
-        .map((item) => MenuItem.fromMap(item as Map<String, dynamic>))
-        .toList();
+        .stream(primaryKey: ['id'])
+        .order('name')
+        .limit(5);
   }
 
 
@@ -96,8 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
 
               Expanded(
-                child: FutureBuilder<List<MenuItem>>(
-                  future: _featuredFuture,
+                child: StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: _featuredStream,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
@@ -109,7 +102,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     }
 
-                    final items = snapshot.data ?? [];
+                    final items = (snapshot.data ?? [])
+                        .map((e) => MenuItem.fromMap(e))
+                        .toList();
                     if (items.isEmpty) {
                       return const Center(child: Text('No items found.'));
                     }

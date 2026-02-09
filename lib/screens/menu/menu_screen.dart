@@ -12,30 +12,15 @@ class MenuScreen extends StatefulWidget {
 }
 
 class _MenuScreenState extends State<MenuScreen> {
-  late Future<List<MenuItem>> _itemsFuture;
+  late final Stream<List<Map<String, dynamic>>> _menuStream;
 
   @override
   void initState() {
     super.initState();
-    _itemsFuture = _fetchMenuItems();
-  }
-
-  Future<List<MenuItem>> _fetchMenuItems() async {
-    final response = await Supabase.instance.client
+    _menuStream = Supabase.instance.client
         .from('menu_items')
-        .select('id, name, price, image_url, description, is_available')
+        .stream(primaryKey: ['id'])
         .order('name');
-    final items = (response as List<dynamic>)
-        .map((item) => MenuItem.fromMap(item as Map<String, dynamic>))
-        .toList();
-    return items;
-  }
-
-  Future<void> _refresh() async {
-    setState(() {
-      _itemsFuture = _fetchMenuItems();
-    });
-    await _itemsFuture;
   }
 
   @override
@@ -59,8 +44,8 @@ class _MenuScreenState extends State<MenuScreen> {
               ),
               const SizedBox(height: 20),
               Expanded(
-                child: FutureBuilder<List<MenuItem>>(
-                  future: _itemsFuture,
+                child: StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: _menuStream,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
@@ -75,7 +60,9 @@ class _MenuScreenState extends State<MenuScreen> {
                       );
                     }
 
-                    final items = snapshot.data ?? [];
+                    final items = (snapshot.data ?? [])
+                        .map((e) => MenuItem.fromMap(e))
+                        .toList();
                     if (items.isEmpty) {
                       return Center(
                         child: Column(
@@ -100,12 +87,10 @@ class _MenuScreenState extends State<MenuScreen> {
                       );
                     }
 
-                    return RefreshIndicator(
-                      onRefresh: _refresh,
-                      child: ListView.separated(
-                        padding: const EdgeInsets.only(bottom: 100),
-                        itemCount: items.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 16),
+                    return ListView.separated(
+                      padding: const EdgeInsets.only(bottom: 100),
+                      itemCount: items.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 16),
                         itemBuilder: (context, index) {
                           final item = items[index];
                           return LiquidGlassProductCard(
@@ -120,8 +105,7 @@ class _MenuScreenState extends State<MenuScreen> {
                             },
                           );
                         },
-                      ),
-                    );
+                      );
                   },
                 ),
               ),

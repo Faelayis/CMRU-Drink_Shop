@@ -8,13 +8,12 @@ class LanguageScreen extends StatefulWidget {
 }
 
 class _LanguageScreenState extends State<LanguageScreen> {
-  // สมมติว่าเก็บค่าภาษาปัจจุบันไว้ (ในแอปจริงอาจจะดึงจาก Provider/SharedPref)
-  String _selectedLanguageCode = 'en'; 
+  String _selectedLanguageCode = 'en';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3E9D9), // สีพื้นหลังครีม
+      backgroundColor: const Color(0xFFF3E9D9),
       appBar: AppBar(
         backgroundColor: const Color(0xFFF3E9D9),
         elevation: 0,
@@ -26,7 +25,6 @@ class _LanguageScreenState extends State<LanguageScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // --- ส่วนหัวข้อ ---
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
             child: Text(
@@ -34,21 +32,20 @@ class _LanguageScreenState extends State<LanguageScreen> {
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                fontFamily: 'Serif', // ฟอนต์มีเชิงตามสไตล์แอป
+                fontFamily: 'Serif',
                 color: Color(0xFF4E342E),
               ),
             ),
           ),
           const SizedBox(height: 24),
 
-          // --- ส่วนรายการเมนู (Card สีเข้มกว่า) ---
           Expanded(
             child: Container(
               width: double.infinity,
               decoration: const BoxDecoration(
-                color: Color(0xFFEADCC6), // สีพื้นหลังของ Card (เข้มกว่า Background นิดหน่อย)
+                color: Color(0xFFEADCC6),
                 borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(32), // มุมโค้งด้านบน
+                  top: Radius.circular(32),
                 ),
               ),
               child: Padding(
@@ -77,7 +74,6 @@ class _LanguageScreenState extends State<LanguageScreen> {
     );
   }
 
-  // Widget สร้างรายการภาษาแต่ละบรรทัด
   Widget _buildLanguageItem({
     required String label, 
     required String code, 
@@ -88,8 +84,6 @@ class _LanguageScreenState extends State<LanguageScreen> {
         setState(() {
           _selectedLanguageCode = code;
         });
-        // ตรงนี้ใส่ Logic เปลี่ยนภาษาของแอปจริงๆ ได้เลย
-        // context.setLocale(...) 
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -105,7 +99,7 @@ class _LanguageScreenState extends State<LanguageScreen> {
               ),
             ),
             Icon(
-              Icons.chevron_right, // ไอคอนลูกศรชี้ขวาตามภาพ
+              Icons.chevron_right,
               color: const Color(0xFF4E342E).withOpacity(0.6),
               size: 20,
             ),
@@ -115,7 +109,6 @@ class _LanguageScreenState extends State<LanguageScreen> {
     );
   }
 
-  // Widget เส้นขีดคั่นบางๆ
   Widget _buildDivider() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),

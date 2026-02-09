@@ -12,7 +12,8 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
-  late Future<List<OrderRecord>> _ordersFuture;
+  Stream<List<Map<String, dynamic>>>? _orderStream;
+
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'completed':
@@ -29,30 +30,14 @@ class _OrderScreenState extends State<OrderScreen> {
   @override
   void initState() {
     super.initState();
-    _ordersFuture = _fetchOrders();
-  }
-
-  Future<List<OrderRecord>> _fetchOrders() async {
     final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) {
-      return [];
+    if (user != null) {
+      _orderStream = Supabase.instance.client
+          .from('orders')
+          .stream(primaryKey: ['id'])
+          .eq('user_id', user.id)
+          .order('created_at', ascending: false);
     }
-
-    final response = await Supabase.instance.client
-        .from('orders')
-        .select('id, status, total_amount, created_at')
-        .eq('user_id', user.id)
-        .order('created_at', ascending: false);
-    return (response as List<dynamic>)
-        .map((item) => OrderRecord.fromMap(item as Map<String, dynamic>))
-        .toList();
-  }
-
-  Future<void> _refresh() async {
-    setState(() {
-      _ordersFuture = _fetchOrders();
-    });
-    await _ordersFuture;
   }
 
   @override
@@ -117,8 +102,8 @@ class _OrderScreenState extends State<OrderScreen> {
                         ),
                       ),
                     )
-                  : FutureBuilder<List<OrderRecord>>(
-                      future: _ordersFuture,
+                  : StreamBuilder<List<Map<String, dynamic>>>(
+                      stream: _orderStream,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -136,7 +121,9 @@ class _OrderScreenState extends State<OrderScreen> {
                           );
                         }
 
-                        final orders = snapshot.data ?? [];
+                        final orders = (snapshot.data ?? [])
+                            .map((e) => OrderRecord.fromMap(e))
+                            .toList();
                         if (orders.isEmpty) {
                           return ListView(
                             padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
@@ -167,9 +154,7 @@ class _OrderScreenState extends State<OrderScreen> {
                           );
                         }
 
-                        return RefreshIndicator(
-                          onRefresh: _refresh,
-                          child: ListView.separated(
+                        return ListView.separated(
                             padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
                             itemCount: orders.length,
                             separatorBuilder: (_, __) =>
@@ -295,8 +280,7 @@ class _OrderScreenState extends State<OrderScreen> {
                                 ),
                               );
                             },
-                          ),
-                        );
+                          );
                       },
                     ),
             ),
