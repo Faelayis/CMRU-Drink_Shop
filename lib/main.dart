@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'config/env.dart';
-import 'screens/splash/splash_screen.dart'; // เรียกใช้หน้า Splash Screen
+import 'screens/splash/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,12 +28,12 @@ class BrewlyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Brewly Drink Shop',
       theme: ThemeData(
-        fontFamily: 'Serif', // ตั้งค่าฟอนต์หลัก
-        scaffoldBackgroundColor: const Color(0xFFF3E9D9), // สีพื้นหลังครีม
-        primaryColor: const Color(0xFF965A28), // สีน้ำตาลหลัก
+        fontFamily: GoogleFonts.notoSans().fontFamily,
+        textTheme: GoogleFonts.notoSansTextTheme(),
+        scaffoldBackgroundColor: const Color(0xFFF3E9D9),
+        primaryColor: const Color(0xFF965A28),
         useMaterial3: true,
       ),
-      // กำหนดให้เริ่มทำงานที่หน้า SplashScreen เป็นหน้าแรก
       home: const SplashScreen(),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../models/menu_item.dart';
 
 class AdminScreen extends StatefulWidget {
@@ -160,7 +161,13 @@ class _AdminScreenState extends State<AdminScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3E9D9),
       appBar: AppBar(
-        title: const Text('Admin Panel'),
+        title: Text(
+          'Admin Panel',
+          style: GoogleFonts.notoSans(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         backgroundColor: const Color(0xFFF3E9D9),
         elevation: 0,
       ),
@@ -189,79 +196,74 @@ class _AdminScreenState extends State<AdminScreen> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
             itemCount: items.length,
             separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFEADCC6),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: item.imageUrl == null || item.imageUrl!.isEmpty
-                            ? Container(
-                                width: 56,
-                                height: 56,
-                                color: Colors.brown.shade200,
-                                child: const Icon(
-                                  Icons.local_cafe,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Image.network(
-                                item.imageUrl!,
-                                width: 56,
-                                height: 56,
-                                fit: BoxFit.cover,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEADCC6),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: item.imageUrl == null || item.imageUrl!.isEmpty
+                          ? Container(
+                              width: 56,
+                              height: 56,
+                              color: Colors.brown.shade200,
+                              child: const Icon(
+                                Icons.local_cafe,
+                                color: Colors.white,
                               ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
+                            )
+                          : Image.network(
+                              item.imageUrl!,
+                              width: 56,
+                              height: 56,
+                              fit: BoxFit.cover,
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '฿${item.price.toStringAsFixed(2)}',
-                              style: const TextStyle(color: Color(0xFF965A28)),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            item.name,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '฿${item.price.toStringAsFixed(2)}',
+                            style: const TextStyle(color: Color(0xFF965A28)),
+                          ),
+                          if (!item.isAvailable)
+                            const Text(
+                              'Sold out',
+                              style: TextStyle(color: Colors.red, fontSize: 12),
                             ),
-                            if (!item.isAvailable)
-                              const Text(
-                                'Sold out',
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 12,
-                                ),
-                              ),
-                          ],
-                        ),
+                        ],
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.edit, size: 20),
-                        onPressed: () => _showItemDialog(existing: item),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.edit, size: 20),
+                      onPressed: () => _showItemDialog(existing: item),
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.delete,
+                        size: 20,
+                        color: Colors.red,
                       ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.delete,
-                          size: 20,
-                          color: Colors.red,
-                        ),
-                        onPressed: () => _deleteItem(item.id),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
+                      onPressed: () => _deleteItem(item.id),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
         },
       ),
     );

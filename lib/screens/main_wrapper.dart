@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'home/home_screen.dart';
 import 'setting/settings_screen.dart';
-import 'menu/menu_screen.dart'; // Import หน้า Menu
-import 'order/order_status_screen.dart'; // Import หน้า Order
+import 'menu/menu_screen.dart';
+import 'order/order_status_screen.dart';
 
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
@@ -12,40 +12,36 @@ class MainWrapper extends StatefulWidget {
 }
 
 class _MainWrapperState extends State<MainWrapper> {
-  int _selectedIndex = 1; // เริ่มต้นที่หน้า Home (Index 1)
+  int _selectedIndex = 1;
 
-  // รายการหน้าจอครบทั้ง 4 หน้า
   final List<Widget> _pages = [
-    const MenuScreen(), // Index 0: Menu
-    const HomeScreen(), // Index 1: Home
-    const OrderScreen(), // Index 2: Order
-    const SettingScreen(), // Index 3: Setting
+    const MenuScreen(),
+    const HomeScreen(),
+    const OrderScreen(),
+    const SettingScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // ใช้ Stack เพื่อให้ Bottom Bar ลอยอยู่เหนือเนื้อหา (Overlay)
       body: Stack(
         children: [
-          // Layer 1: เนื้อหาของแต่ละหน้า
           _pages[_selectedIndex],
 
-          // Layer 2: Custom Bottom Navigation Bar
           Positioned(
             left: 20,
             right: 20,
-            bottom: 20, // ระยะห่างจากขอบล่าง
+            bottom: 20,
             child: SafeArea(
               minimum: const EdgeInsets.only(bottom: 12),
               child: Container(
                 height: 70,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF965A28), // สีน้ำตาลเข้ม
-                  borderRadius: BorderRadius.circular(35), // ความโค้งมน
+                  color: const Color(0xFF965A28),
+                  borderRadius: BorderRadius.circular(35),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.2), // เงา
+                      color: Colors.black.withOpacity(0.2),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     ),
@@ -75,7 +71,6 @@ class _MainWrapperState extends State<MainWrapper> {
     );
   }
 
-  // Widget สำหรับสร้างปุ่มแต่ละอันใน Navigation Bar
   Widget _buildNavItem(IconData icon, String label, int index) {
     bool isSelected = _selectedIndex == index;
 
@@ -98,7 +93,7 @@ class _MainWrapperState extends State<MainWrapper> {
               children: [
                 Icon(
                   icon,
-                  // เปลี่ยนสีตามสถานะการเลือก
+
                   color: isSelected ? Colors.white : Colors.white70,
                   size: 28,
                 ),

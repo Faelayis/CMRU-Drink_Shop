@@ -91,21 +91,21 @@ class _MenuScreenState extends State<MenuScreen> {
                       padding: const EdgeInsets.only(bottom: 100),
                       itemCount: items.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 16),
-                        itemBuilder: (context, index) {
-                          final item = items[index];
-                          return LiquidGlassProductCard(
-                            item: item,
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      ProductDetailScreen(item: item),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      );
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        return LiquidGlassProductCard(
+                          item: item,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ProductDetailScreen(item: item),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    );
                   },
                 ),
               ),

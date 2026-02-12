@@ -1,4 +1,4 @@
-import 'dart:ui'; // จำเป็นสำหรับ ImageFilter
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/menu_item.dart';
@@ -24,11 +24,10 @@ class _HomeScreenState extends State<HomeScreen> {
         .limit(5);
   }
 
-
   @override
   Widget build(BuildContext context) {
     final user = Supabase.instance.client.auth.currentUser;
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFFF3E9D9),
       body: SafeArea(
@@ -65,25 +64,25 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   Container(
-                    width: 50, height: 50,
+                    width: 50,
+                    height: 50,
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.4),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.white.withOpacity(0.6)),
                     ),
                     child: Icon(Icons.person, color: Colors.brown.shade300),
-                  )
+                  ),
                 ],
               ),
-              
+
               const SizedBox(height: 24),
-              
               const Text(
                 'Recommended for you',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF4E342E)
+                  color: Color(0xFF4E342E),
                 ),
               ),
               const SizedBox(height: 16),
@@ -111,14 +110,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     return GridView.builder(
                       padding: const EdgeInsets.only(bottom: 100),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 0.72,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 0.72,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                          ),
                       itemCount: items.length,
-                      itemBuilder: (context, index) => _buildGlassGridItem(context, items[index]),
+                      itemBuilder: (context, index) =>
+                          _buildGlassGridItem(context, items[index]),
                     );
                   },
                 ),
@@ -176,25 +177,26 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Colors.black.withOpacity(0.08),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
-                            )
+                            ),
                           ],
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(20),
-                          child: item.imageUrl != null && item.imageUrl!.isNotEmpty
-                              ? Image.network(
-                                  item.imageUrl!,
-                                  fit: BoxFit.cover,
-                                )
+                          child:
+                              item.imageUrl != null && item.imageUrl!.isNotEmpty
+                              ? Image.network(item.imageUrl!, fit: BoxFit.cover)
                               : Container(
                                   color: Colors.brown.shade100,
-                                  child: const Icon(Icons.local_cafe, color: Colors.white),
+                                  child: const Icon(
+                                    Icons.local_cafe,
+                                    color: Colors.white,
+                                  ),
                                 ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    
+
                     Text(
                       item.name,
                       maxLines: 1,
@@ -206,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -225,9 +227,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: const Icon(
-                            Icons.add, 
-                            color: Colors.white, 
-                            size: 16
+                            Icons.add,
+                            color: Colors.white,
+                            size: 16,
                           ),
                         ),
                       ],

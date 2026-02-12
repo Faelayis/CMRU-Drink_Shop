@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../screens/main_wrapper.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -90,7 +91,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3E9D9),
       appBar: AppBar(
-        title: const Text('Create Account'),
+        title: Text(
+          'Create Account',
+          style: GoogleFonts.notoSans(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         backgroundColor: const Color(0xFFF3E9D9),
         elevation: 0,
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../models/menu_item.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -15,7 +16,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool _isSubmitting = false;
   int _quantity = 1;
   int _selectedSizeIndex = 1;
-
 
   double get _totalPrice => widget.item.price * _quantity;
 
@@ -48,13 +48,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     try {
       String sizeLabel = ['Small', 'Medium', 'Large'][_selectedSizeIndex];
-      
+
       await Supabase.instance.client.from('orders').insert({
         'user_id': user.id,
         'status': 'pending',
         'total_amount': _totalPrice,
         'size': sizeLabel,
-      
       });
 
       if (!mounted) return;
@@ -65,9 +64,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       Navigator.of(context).pop();
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to place order: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to place order: $error')));
     } finally {
       if (mounted) {
         setState(() {
@@ -84,7 +83,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF3E9D9),
       appBar: AppBar(
-        title: Text(item.name),
+        title: Text(
+          item.name,
+          style: GoogleFonts.notoSans(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         backgroundColor: const Color(0xFFF3E9D9),
         elevation: 0,
       ),
@@ -149,11 +154,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           const SizedBox(height: 16),
                           Row(
                             children: [
-                              _buildSizeOption(0, Icons.coffee, 24), // S
+                              _buildSizeOption(0, Icons.coffee, 24),
                               const SizedBox(width: 16),
-                              _buildSizeOption(1, Icons.coffee, 32), // M
+                              _buildSizeOption(1, Icons.coffee, 32),
                               const SizedBox(width: 16),
-                              _buildSizeOption(2, Icons.coffee, 40), // L
+                              _buildSizeOption(2, Icons.coffee, 40),
                             ],
                           ),
                         ],
@@ -163,7 +168,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
               ),
             ),
-            
+
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
@@ -173,7 +178,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     color: Colors.brown.withOpacity(0.05),
                     offset: const Offset(0, -4),
                     blurRadius: 10,
-                  )
+                  ),
                 ],
               ),
               child: SizedBox(
@@ -234,7 +239,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             image: DecorationImage(
               image: item.imageUrl != null && item.imageUrl!.isNotEmpty
                   ? NetworkImage(item.imageUrl!)
-                  : const NetworkImage('https://via.placeholder.com/300'),
+                  : const NetworkImage(''),
               fit: BoxFit.cover,
             ),
             boxShadow: [
@@ -246,7 +251,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ],
           ),
         ),
-        
 
         Positioned(
           top: 32,
@@ -259,11 +263,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 color: Colors.black.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
+              child: const Icon(
+                Icons.arrow_back_ios_new,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
         ),
-
 
         Positioned(
           bottom: 0,
@@ -302,6 +309,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ],
     );
   }
+
   Widget _buildQuantityButton(IconData icon, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
@@ -313,7 +321,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  // Widget ตัวเลือกขนาดแก้ว
   Widget _buildSizeOption(int index, IconData icon, double iconSize) {
     bool isSelected = _selectedSizeIndex == index;
     return Expanded(
@@ -324,7 +331,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           });
         },
         child: Container(
-          height: 80, // ความสูงกล่อง
+          height: 80,
           decoration: BoxDecoration(
             color: isSelected ? const Color(0xFFF9F0E6) : Colors.white,
             borderRadius: BorderRadius.circular(16),
@@ -337,7 +344,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             child: Icon(
               icon,
               size: iconSize,
-              color: isSelected ? const Color(0xFFC67C4E) : Colors.grey.shade400,
+              color: isSelected
+                  ? const Color(0xFFC67C4E)
+                  : Colors.grey.shade400,
             ),
           ),
         ),
