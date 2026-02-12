@@ -13,13 +13,13 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  bool _isLoading = true;
   bool _isSaving = false;
+  Stream<List<Map<String, dynamic>>>? _profileStream;
 
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    _profileStream = _getProfileStream();
   }
 
   @override
@@ -29,28 +29,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _loadProfile() async {
+  Stream<List<Map<String, dynamic>>> _getProfileStream() {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) {
-      setState(() => _isLoading = false);
-      return;
+      return Stream.value([]);
     }
 
-    try {
-      final response = await Supabase.instance.client
-          .from('profiles')
-          .select('id, full_name, avatar_url, phone')
-          .eq('id', user.id)
-          .maybeSingle();
+    return Supabase.instance.client
+        .from('profiles')
+        .stream(primaryKey: ['id'])
+        .eq('id', user.id);
+  }
 
-      if (response != null) {
-        final profile = Profile.fromMap(response);
-        _nameController.text = profile.fullName ?? '';
-        _phoneController.text = profile.phone ?? '';
-      }
-    } catch (_) {}
-
-    if (mounted) setState(() => _isLoading = false);
+  Future<void> _refreshProfile() async {
+    setState(() {
+      _profileStream = _getProfileStream();
+    });
+    await Future.delayed(const Duration(seconds: 1));
   }
 
   Future<void> _saveProfile() async {
@@ -96,73 +91,98 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: const Color(0xFFF3E9D9),
         elevation: 0,
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : user == null
+      body: user == null
           ? const Center(child: Text('Please sign in to edit your profile.'))
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: CircleAvatar(
-                      radius: 48,
-                      backgroundColor: Colors.brown.shade200,
-                      child: const Icon(
-                        Icons.person,
-                        size: 48,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Center(
-                    child: Text(
-                      user.email ?? '',
-                      style: const TextStyle(color: Colors.black54),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  TextField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Full Name',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
-                      labelText: 'Phone',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: _isSaving ? null : _saveProfile,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      backgroundColor: const Color(0xFF965A28),
-                    ),
-                    child: _isSaving
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
+          : StreamBuilder<List<Map<String, dynamic>>>(
+              stream: _profileStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+
+                final profileData = snapshot.data?.isNotEmpty == true
+                    ? snapshot.data!.first
+                    : <String, dynamic>{};
+
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (_nameController.text.isEmpty && profileData.isNotEmpty) {
+                    _nameController.text = profileData['full_name'] ?? '';
+                    _phoneController.text = profileData['phone'] ?? '';
+                  }
+                });
+
+                return RefreshIndicator(
+                  onRefresh: _refreshProfile,
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Center(
+                          child: CircleAvatar(
+                            radius: 48,
+                            backgroundColor: Colors.brown.shade200,
+                            child: const Icon(
+                              Icons.person,
+                              size: 48,
                               color: Colors.white,
                             ),
-                          )
-                        : const Text(
-                            'Save',
-                            style: TextStyle(color: Colors.white),
                           ),
+                        ),
+                        const SizedBox(height: 12),
+                        Center(
+                          child: Text(
+                            user.email ?? '',
+                            style: const TextStyle(color: Colors.black54),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        TextField(
+                          controller: _nameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Full Name',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _phoneController,
+                          keyboardType: TextInputType.phone,
+                          decoration: const InputDecoration(
+                            labelText: 'Phone',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        ElevatedButton(
+                          onPressed: _isSaving ? null : _saveProfile,
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            backgroundColor: const Color(0xFF965A28),
+                          ),
+                          child: _isSaving
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Save',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                );
+              },
             ),
     );
   }

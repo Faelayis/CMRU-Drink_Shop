@@ -27,22 +27,40 @@ class _OrderScreenState extends State<OrderScreen> {
     }
   }
 
+  Stream<List<Map<String, dynamic>>> _getOrdersStream() {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      return Stream.value([]);
+    }
+    return Supabase.instance.client
+        .from('orders')
+        .stream(primaryKey: ['id'])
+        .eq('user_id', user.id)
+        .order('created_at', ascending: false);
+  }
+
   @override
   void initState() {
     super.initState();
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user != null) {
-      _orderStream = Supabase.instance.client
-          .from('orders')
-          .stream(primaryKey: ['id'])
-          .eq('user_id', user.id)
-          .order('created_at', ascending: false);
-    }
+    _orderStream = _getOrdersStream();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  Future<void> _refreshOrders() async {
+    setState(() {
+      _orderStream = _getOrdersStream();
+    });
+    await Future.delayed(const Duration(seconds: 1));
   }
 
   @override
   Widget build(BuildContext context) {
     final user = Supabase.instance.client.auth.currentUser;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF3E9D9),
       body: SafeArea(
@@ -125,160 +143,172 @@ class _OrderScreenState extends State<OrderScreen> {
                             .map((e) => OrderRecord.fromMap(e))
                             .toList();
                         if (orders.isEmpty) {
-                          return ListView(
-                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                            children: [
-                              Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 60.0),
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        Icons.inbox,
-                                        size: 72,
-                                        color: Colors.brown.withOpacity(0.2),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      const Text(
-                                        "No orders yet",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          color: Colors.black54,
+                          return RefreshIndicator(
+                            onRefresh: _refreshOrders,
+                            child: ListView(
+                              padding: const EdgeInsets.fromLTRB(
+                                20,
+                                0,
+                                20,
+                                100,
+                              ),
+                              children: [
+                                Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 60.0),
+                                    child: Column(
+                                      children: [
+                                        Icon(
+                                          Icons.inbox,
+                                          size: 72,
+                                          color: Colors.brown.withOpacity(0.2),
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(height: 16),
+                                        const Text(
+                                          "No orders yet",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           );
                         }
 
-                        return ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                          itemCount: orders.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final order = orders[index];
+                        return RefreshIndicator(
+                          onRefresh: _refreshOrders,
+                          child: ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                            itemCount: orders.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final order = orders[index];
 
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(24),
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(
-                                  sigmaX: 10,
-                                  sigmaY: 10,
-                                ),
-                                child: Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(24),
-
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.4),
-                                      width: 1.5,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.brown.withOpacity(0.05),
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 10),
-                                      ),
-                                    ],
+                              return ClipRRect(
+                                borderRadius: BorderRadius.circular(24),
+                                child: BackdropFilter(
+                                  filter: ImageFilter.blur(
+                                    sigmaX: 10,
+                                    sigmaY: 10,
                                   ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                          color: const Color(
-                                            0xFF965A28,
-                                          ).withOpacity(0.15),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.receipt_long_rounded,
-                                          color: Color(0xFF4E342E),
-                                          size: 28,
-                                        ),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(24),
+
+                                      border: Border.all(
+                                        color: Colors.white.withOpacity(0.4),
+                                        width: 1.5,
                                       ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.brown.withOpacity(0.05),
+                                          blurRadius: 20,
+                                          offset: const Offset(0, 10),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                            color: const Color(
+                                              0xFF965A28,
+                                            ).withOpacity(0.15),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.receipt_long_rounded,
+                                            color: Color(0xFF4E342E),
+                                            size: 28,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'Order #${order.id.toString().substring(0, 8)}...',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                  color: Color(0xFF4E342E),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 4,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: _getStatusColor(
+                                                    order.status,
+                                                  ).withOpacity(0.1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: Text(
+                                                  order.status.toUpperCase(),
+                                                  style: TextStyle(
+                                                    color: _getStatusColor(
+                                                      order.status,
+                                                    ),
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.bold,
+                                                    letterSpacing: 0.5,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Column(
                                           crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                              CrossAxisAlignment.end,
                                           children: [
                                             Text(
-                                              'Order #${order.id.toString().substring(0, 8)}...',
+                                              '฿${order.totalAmount.toStringAsFixed(2)}',
                                               style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
+                                                fontWeight: FontWeight.w900,
+                                                fontSize: 18,
                                                 color: Color(0xFF4E342E),
                                               ),
                                             ),
-                                            const SizedBox(height: 6),
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 4,
+                                            if (order.createdAt != null)
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  top: 4,
+                                                ),
+                                                child: Text(
+                                                  '${order.createdAt!.day}/${order.createdAt!.month}/${order.createdAt!.year}',
+                                                  style: TextStyle(
+                                                    color:
+                                                        Colors.brown.shade400,
+                                                    fontSize: 12,
                                                   ),
-                                              decoration: BoxDecoration(
-                                                color: _getStatusColor(
-                                                  order.status,
-                                                ).withOpacity(0.1),
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              child: Text(
-                                                order.status.toUpperCase(),
-                                                style: TextStyle(
-                                                  color: _getStatusColor(
-                                                    order.status,
-                                                  ),
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.bold,
-                                                  letterSpacing: 0.5,
                                                 ),
                                               ),
-                                            ),
                                           ],
                                         ),
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                        children: [
-                                          Text(
-                                            '฿${order.totalAmount.toStringAsFixed(2)}',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w900,
-                                              fontSize: 18,
-                                              color: Color(0xFF4E342E),
-                                            ),
-                                          ),
-                                          if (order.createdAt != null)
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                top: 4,
-                                              ),
-                                              child: Text(
-                                                '${order.createdAt!.day}/${order.createdAt!.month}/${order.createdAt!.year}',
-                                                style: TextStyle(
-                                                  color: Colors.brown.shade400,
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
+                              );
+                            },
+                          ),
                         );
                       },
                     ),

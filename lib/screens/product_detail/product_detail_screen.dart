@@ -253,26 +253,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
 
         Positioned(
-          top: 32,
-          left: 32,
-          child: InkWell(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.arrow_back_ios_new,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-          ),
-        ),
-
-        Positioned(
           bottom: 0,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

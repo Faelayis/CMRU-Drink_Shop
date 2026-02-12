@@ -15,31 +15,30 @@ class SettingScreen extends StatefulWidget {
 
 class _SettingScreenState extends State<SettingScreen> {
   bool _isNotificationEnabled = true;
-  late Future<Profile?> _profileFuture;
+  Stream<Profile?>? _profileStream;
 
   @override
   void initState() {
     super.initState();
-    _profileFuture = _fetchProfile();
+    _profileStream = _getProfileStream();
   }
 
-  Future<Profile?> _fetchProfile() async {
+  Stream<Profile?> _getProfileStream() {
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) {
-      return null;
+      return Stream.value(null);
     }
 
-    final response = await Supabase.instance.client
+    return Supabase.instance.client
         .from('profiles')
-        .select('id, full_name, avatar_url, phone, is_admin')
+        .stream(primaryKey: ['id'])
         .eq('id', user.id)
-        .maybeSingle();
-
-    if (response == null) {
-      return Profile(id: user.id, fullName: user.email);
-    }
-
-    return Profile.fromMap(response);
+        .map((data) {
+          if (data.isEmpty) {
+            return Profile(id: user.id, fullName: user.email);
+          }
+          return Profile.fromMap(data[0]);
+        });
   }
 
   Future<void> _resetPassword() async {
@@ -163,8 +162,8 @@ class _SettingScreenState extends State<SettingScreen> {
                     horizontal: 24,
                   ),
                   children: [
-                    FutureBuilder<Profile?>(
-                      future: _profileFuture,
+                    StreamBuilder<Profile?>(
+                      stream: _profileStream,
                       builder: (context, snapshot) {
                         final user = Supabase.instance.client.auth.currentUser;
                         final profile = snapshot.data;
@@ -302,8 +301,8 @@ class _SettingScreenState extends State<SettingScreen> {
                     ),
                     _buildDivider(),
 
-                    FutureBuilder<Profile?>(
-                      future: _profileFuture,
+                    StreamBuilder<Profile?>(
+                      stream: _profileStream,
                       builder: (context, snapshot) {
                         final profile = snapshot.data;
                         if (profile == null || !profile.isAdmin) {
